@@ -37,8 +37,8 @@ describe('HeaderComponent', () => {
 
   it('emite toggle', () => {
     const spy = jasmine.createSpy('toggle');
-    component.toggle.subscribe(spy);
-    component.toggle.emit();
+    component.menuToggle.subscribe(spy);
+    component.menuToggle.emit();
     expect(spy).toHaveBeenCalled();
   });
 });
