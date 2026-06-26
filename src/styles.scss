@@ -1,0 +1,91 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Paleta azul farmacéutico (#1565C0)
+$pharma-primary: mat.define-palette(mat.$blue-palette, 800);
+$pharma-accent: mat.define-palette(mat.$teal-palette, 400);
+$pharma-warn: mat.define-palette(mat.$red-palette);
+
+$pharma-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $pharma-primary,
+      accent: $pharma-accent,
+      warn: $pharma-warn,
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
+
+@include mat.all-component-themes($pharma-theme);
+
+:root {
+  --pharma-primary: #1565c0;
+  --pharma-critical: #d32f2f;
+  --pharma-warning: #f9a825;
+  --pharma-success: #2e7d32;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: #f5f7fa;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Feedback de snackbar
+.snack-success {
+  --mdc-snackbar-container-color: var(--pharma-success);
+  --mat-snack-bar-button-color: #fff;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+.snack-error {
+  --mdc-snackbar-container-color: var(--pharma-critical);
+  --mat-snack-bar-button-color: #fff;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+// Filas de tabla con alertas
+.row-critical {
+  border-left: 4px solid var(--pharma-critical);
+}
+
+.row-expiring {
+  border-left: 4px solid var(--pharma-warning);
+}
+
+// Badges
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-critical {
+  background: rgba(211, 47, 47, 0.12);
+  color: var(--pharma-critical);
+}
+
+.badge-warning {
+  background: rgba(249, 168, 37, 0.18);
+  color: #8a6100;
+}
+
+.badge-ok {
+  background: rgba(46, 125, 50, 0.12);
+  color: var(--pharma-success);
+}
