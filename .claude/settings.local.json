@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm install --no-audit --no-fund 2>&1)",
+      "PowerShell(npx ng build --configuration development 2>&1)",
+      "PowerShell(node -e \"console.log\\('ng2-charts', require\\('./node_modules/ng2-charts/package.json'\\).version\\); console.log\\('chart.js', require\\('./node_modules/chart.js/package.json'\\).version\\)\")",
+      "PowerShell($env:CHROME_BIN = \\(Get-Command chrome.exe -ErrorAction SilentlyContinue\\).Source; if \\(-not $env:CHROME_BIN\\) { $p = 'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'; if \\(Test-Path $p\\) { $env:CHROME_BIN = $p } }; Write-Output \"CHROME_BIN=$env:CHROME_BIN\")",
+      "PowerShell($env:CHROME_BIN = 'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'; npx ng test --watch=false --browsers=ChromeHeadless --code-coverage 2>&1 | Select-Object -Last 60)",
+      "PowerShell($env:CHROME_BIN = 'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'; npx ng test --watch=false --browsers=ChromeHeadless --code-coverage 2>&1 | Select-String -Pattern 'SUCCESS|FAILED|TOTAL|Error|Coverage|Statements|Branches|Functions|Lines' | Select-Object -Last 30)",
+      "PowerShell($env:CHROME_BIN = 'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'; npx ng test --watch=false --browsers=ChromeHeadless 2>&1 | Select-String -Pattern 'TOTAL|FAILED|ERROR' | Select-Object -Last 20)"
+    ]
+  }
+}
