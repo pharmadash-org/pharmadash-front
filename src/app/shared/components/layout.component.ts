@@ -16,6 +16,7 @@ import { map } from 'rxjs/operators';
 import { HeaderComponent } from './header.component';
 import { SidebarComponent } from './sidebar.component';
 import { LoadingService } from '../../core/services/loading.service';
+import { StockAlertService } from '../../core/services/stock-alert.service';
 
 @Component({
   selector: 'app-layout',
@@ -94,6 +95,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav?: MatSidenav;
   readonly loading = inject(LoadingService);
   private readonly breakpoint = inject(BreakpointObserver);
+  private readonly stockAlert = inject(StockAlertService);
   private sub?: Subscription;
 
   readonly isHandset$ = this.breakpoint
@@ -103,6 +105,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Mantener la suscripción viva para que el async pipe del template reaccione.
     this.sub = this.isHandset$.subscribe();
+    // Vigila el inventario y avisa al Admin de stock crítico / por vencer.
+    this.stockAlert.start();
   }
 
   closeOnHandset(sidenav: MatSidenav): void {
