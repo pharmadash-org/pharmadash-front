@@ -335,7 +335,7 @@ export class MedicationFormDialogComponent {
   }
 }
 
-function integerValidator(control: {
+export function integerValidator(control: {
   value: unknown;
 }): { integer: true } | null {
   const v = control.value;
@@ -350,7 +350,7 @@ function integerValidator(control: {
  * medianoche UTC del día LOCAL elegido. Así se preserva el día seleccionado
  * sin el desfase que produce toISOString() en zonas horarias negativas.
  */
-function toIsoDate(value: Date | string | null): string {
+export function toIsoDate(value: Date | string | null): string {
   if (!value) {
     return '';
   }
