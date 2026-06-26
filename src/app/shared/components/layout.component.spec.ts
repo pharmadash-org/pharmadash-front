@@ -6,6 +6,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { of } from 'rxjs';
 import { LayoutComponent } from './layout.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { StockAlertService } from '../../core/services/stock-alert.service';
 
 describe('LayoutComponent', () => {
   let fixture: ComponentFixture<LayoutComponent>;
@@ -28,6 +29,7 @@ describe('LayoutComponent', () => {
           provide: BreakpointObserver,
           useValue: { observe: () => of({ matches, breakpoints: {} }) },
         },
+        { provide: StockAlertService, useValue: { start: () => {} } },
       ],
     });
     fixture = TestBed.createComponent(LayoutComponent);
