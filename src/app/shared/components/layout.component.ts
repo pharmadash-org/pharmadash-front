@@ -31,7 +31,7 @@ import { LoadingService } from '../../core/services/loading.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="layout">
-      <app-header (toggle)="sidenav.toggle()"></app-header>
+      <app-header (menuToggle)="sidenav.toggle()"></app-header>
 
       <mat-progress-bar
         *ngIf="loading.loading$ | async"
