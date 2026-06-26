@@ -37,3 +37,4 @@ Thumbs.db
 
 # Local env (real secrets / client ids)
 src/environments/environment.ts
+!src/environments/environment.ci.ts

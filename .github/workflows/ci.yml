@@ -29,6 +29,9 @@ jobs:
       - name: Install Chrome
         uses: browser-actions/setup-chrome@latest
 
+      - name: Create environment file
+        run: cp src/environments/environment.ci.ts src/environments/environment.ts
+
       - name: Run tests with coverage
         run: npm run test:ci
         env:
