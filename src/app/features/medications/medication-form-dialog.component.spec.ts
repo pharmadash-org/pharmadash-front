@@ -100,6 +100,45 @@ describe('MedicationFormDialogComponent', () => {
     fillValid();
     component.submit();
     expect(component.form.controls.sku.hasError('conflict')).toBeTrue();
+    // El spinner debe soltarse tras el 409 (no quedarse "cargando").
+    expect(component.saving).toBeFalse();
+  });
+
+  it('un error genérico (500) muestra mensaje general y libera el spinner', () => {
+    service.create.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { error: { code: 'X', message: 'Error interno' } },
+          }),
+      ),
+    );
+    createWith({});
+    fillValid();
+    component.submit();
+    expect(component.generalError).toBe('Error interno');
+    expect(component.saving).toBeFalse();
+    expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('no envía dos veces si ya está guardando', () => {
+    service.create.and.returnValue(of({ success: true, data: existing }));
+    createWith({});
+    fillValid();
+    component.saving = true;
+    component.submit();
+    expect(service.create).not.toHaveBeenCalled();
+  });
+
+  it('envía la fecha como ISO completo preservando el día (sin desfase)', () => {
+    service.create.and.returnValue(of({ success: true, data: existing }));
+    createWith({});
+    fillValid();
+    component.form.controls.expiryDate.setValue(new Date(2030, 0, 15));
+    component.submit();
+    const dto = service.create.calls.mostRecent().args[0];
+    expect(dto.expiryDate).toBe('2030-01-15T00:00:00.000Z');
   });
 
   it('400 coloca los errores por campo', () => {
