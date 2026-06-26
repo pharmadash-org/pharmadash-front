@@ -28,7 +28,7 @@ import { AuthService } from '../../core/auth/auth.service';
       <button
         mat-icon-button
         class="menu-btn"
-        (click)="toggle.emit()"
+        (click)="menuToggle.emit()"
         aria-label="Abrir menú"
       >
         <mat-icon>menu</mat-icon>
@@ -119,7 +119,7 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class HeaderComponent {
   readonly auth = inject(AuthService);
-  @Output() toggle = new EventEmitter<void>();
+  @Output() menuToggle = new EventEmitter<void>();
 
   initials(name: string): string {
     return name
