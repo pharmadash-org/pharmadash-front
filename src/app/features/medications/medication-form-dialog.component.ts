@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Inject,
   inject,
@@ -211,6 +212,7 @@ export interface MedicationDialogData {
 export class MedicationFormDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(MedicationService);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly categories = MEDICATION_CATEGORIES;
 
   saving = false;
@@ -291,6 +293,7 @@ export class MedicationFormDialogComponent {
       error: (err: HttpErrorResponse) => {
         this.saving = false;
         this.handleError(err);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -332,7 +335,7 @@ export class MedicationFormDialogComponent {
   }
 }
 
-function integerValidator(control: {
+export function integerValidator(control: {
   value: unknown;
 }): { integer: true } | null {
   const v = control.value;
@@ -342,10 +345,20 @@ function integerValidator(control: {
   return Number.isInteger(Number(v)) ? null : { integer: true };
 }
 
-function toIsoDate(value: Date | string | null): string {
+/**
+ * Devuelve un ISO 8601 completo (lo que espera el backend) pero fijando la
+ * medianoche UTC del día LOCAL elegido. Así se preserva el día seleccionado
+ * sin el desfase que produce toISOString() en zonas horarias negativas.
+ */
+export function toIsoDate(value: Date | string | null): string {
   if (!value) {
     return '';
   }
   const d = value instanceof Date ? value : new Date(value);
-  return d.toISOString();
+  if (Number.isNaN(d.getTime())) {
+    return '';
+  }
+  return new Date(
+    Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()),
+  ).toISOString();
 }

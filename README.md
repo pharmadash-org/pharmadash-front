@@ -163,6 +163,77 @@ src/app/
 - **Vendedor**: inventario en solo lectura (sin botones de acción) y ventas;
   sin acceso al dashboard.
 
+## Arquitectura del Frontend
+
+### Organización por capas
+
+El proyecto sigue una separación en tres zonas que evita que la lógica de negocio quede mezclada con los componentes visuales.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        FEATURES                         │
+│   dashboard · medications · sales · login               │
+│   Cada feature es autónoma. No importa de otra feature. │
+└──────────┬───────────────────────────┬──────────────────┘
+           │ usa servicios de          │ usa componentes de
+┌──────────▼──────────┐   ┌───────────▼──────────────────┐
+│        CORE         │   │           SHARED              │
+│  auth · guards      │   │  layout · confirm-dialog      │
+│  interceptors       │   │  *appHasRole · currencyCop    │
+│  models · utils     │   │  futureDate validator         │
+└─────────────────────┘   └───────────────────────────────┘
+```
+
+**Core** — infraestructura transversal. Solo hay una instancia de cada servicio en toda la app (providedIn root). Contiene todo lo que no pertenece a una feature específica: autenticación, interceptores HTTP, modelos de datos.
+
+**Features** — cada pantalla es un módulo aislado con su propio servicio. El componente no llama directamente al `HttpClient`, llama a su servicio. Eso hace cada feature testeable de forma independiente.
+
+**Shared** — componentes, directivas y pipes reutilizables que no tienen lógica de negocio propia.
+
+### Flujo de una petición HTTP
+
+```
+Componente
+   → llama a Feature Service
+      → HttpClient interceptado por:
+         1. CorrelationIdInterceptor   (agrega X-Correlation-Id a cada request)
+         2. LoadingInterceptor         (activa el spinner global)
+         3. ErrorInterceptor           (captura errores y los normaliza)
+      → llega al Backend API
+```
+
+Ningún componente maneja errores HTTP directamente. El `ErrorInterceptor` los intercepta y los convierte en un formato uniforme.
+
+### Autenticación y autorización en el frontend
+
+Tres mecanismos trabajando juntos:
+
+| Mecanismo | Dónde | Qué hace |
+|-----------|-------|----------|
+| `AuthGuard` | Rutas | Bloquea la ruta si no hay sesión activa, redirige al login |
+| `RoleGuard` | Rutas | Bloquea la ruta si el usuario no tiene el rol requerido |
+| `*appHasRole` | Templates HTML | Oculta o muestra botones/secciones según el rol |
+
+Ejemplo: el botón "Nuevo medicamento" tiene `*appHasRole="['Admin']"`. Un Vendedor que entra a `/medications` ve la tabla pero nunca ve ese botón.
+
+### Estado local del carrito
+
+El carrito de ventas vive en `CartService` como estado en memoria (un array de items). No se persiste en BD ni en localStorage hasta que el usuario pulsa *Procesar venta*. En ese momento se envía todo en una sola petición al backend.
+
+Esto es un patrón deliberado: si el usuario cierra la pestaña antes de confirmar, no queda ninguna venta a medias en la base de datos.
+
+### Performance — OnPush
+
+Los componentes de listado (`MedicationListComponent`, `CartTableComponent`) usan `ChangeDetectionStrategy.OnPush`. Angular solo re-renderiza esos componentes cuando cambia una referencia de input o cuando el componente lo pide explícitamente con `cdr.markForCheck()`. Reduce el trabajo del ciclo de detección de cambios en las vistas más pesadas.
+
+### DRY en el frontend
+
+- `unwrap()` en `core/utils` extrae el `data` de la respuesta estándar `{ success, data }` del backend. Todos los servicios lo usan en lugar de repetir `.pipe(map(r => r.data))` en cada llamada.
+- `CurrencyCopPipe` centraliza el formato de precios en COP. Se usa en tabla de inventario y en el carrito.
+- `futureDateValidator` es un validador reutilizable para cualquier campo de fecha de vencimiento.
+
+---
+
 ## Notas de integración
 
 - El `price` llega como **string** (Prisma Decimal) → se parsea con

@@ -1,11 +1,17 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  importProvidersFrom,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { NgChartsModule } from 'ng2-charts';
 import {
   MSAL_GUARD_CONFIG,
@@ -32,6 +38,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimations(),
+    provideNativeDateAdapter(),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(MsalModule, NgChartsModule),
 
@@ -42,6 +49,15 @@ export const appConfig: ApplicationConfig = {
     MsalService,
     MsalGuard,
     MsalBroadcastService,
+
+    // MSAL v3 exige initialize() antes de cualquier otra API (acquireTokenSilent,
+    // login, etc.). Se ejecuta y se espera antes de arrancar la app.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (msal: MsalService) => () => lastValueFrom(msal.initialize()),
+      deps: [MsalService],
+      multi: true,
+    },
 
     // Interceptores (orden: outermost → innermost).
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
